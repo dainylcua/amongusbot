@@ -5,9 +5,24 @@ const { Client, Collection, Intents } = require('discord.js')
 // Require dotenv to access environment variables
 require('dotenv').config()
 
+// Import fetch
+import('node-fetch')
+
 // Create a client instance with intents
 // GUILDS in Discord represent a server
 const client = new Client({ intents: [Intents.FLAGS.GUILDS]})
+
+// Gets all events, similar to commandFiles
+const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'))
+
+for (file of eventFiles) {
+  const event = require(`./events/${file}`)
+  if (event.once) {
+    client.once(event.name, (...args) => event.execute(...args))
+  } else {
+    client.on(event.name, (...args) => event.execute(...args))
+  }
+}
 
 // Allows the commands to be a new Collection Class and can bve accessed in other files
 client.commands = new Collection()
